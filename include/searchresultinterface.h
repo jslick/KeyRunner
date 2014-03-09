@@ -7,13 +7,15 @@ class SearchResultInterface
 public:
     virtual ~SearchResultInterface() {}
 
+    virtual bool isDynamicallyAllocated() const = 0;
+
     virtual const QString& getId() const = 0;
 
     virtual const QString& getDisplay() const = 0;
 
     virtual const QString& getSearchTerm() const = 0;
 
-    virtual void execute() = 0;
+    virtual bool execute() = 0;
 };
 
 

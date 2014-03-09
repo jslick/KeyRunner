@@ -24,17 +24,18 @@ INCLUDEPATH += $$PWD/../include/
 
 SOURCES += \
     main.cpp \
+    index.cpp \
     mainwindow.cpp \
     resultswidget.cpp \
-    index.cpp \
     keyrunnerui.cpp
 
-HEADERS  += mainwindow.h \
-    index.h \
+HEADERS  += \
     ../include/uiinterface.h \
     ../include/cataloginterface.h \
     ../include/searchresultinterface.h \
     ../include/keyrunnerplugininterface.h \
+    index.h \
+    mainwindow.h \
     resultswidget.h \
     keyrunnerui.h
 

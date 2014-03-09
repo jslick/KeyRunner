@@ -4,9 +4,6 @@
 
 #include <QGenericPlugin>
 
-class UiInterface;
-class CatalogInterface;
-
 class TestCatalogPlugin : public QGenericPlugin, public KeyRunnerPluginInterface
 {
     Q_OBJECT

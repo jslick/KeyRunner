@@ -17,6 +17,12 @@ public:
             this->setText(result->getDisplay());
         }
     }
+
+    ~ResultsListItem()
+    {
+        if (result && result->isDynamicallyAllocated())
+            delete result;
+    }
 };
 
 ResultsWidget::ResultsWidget(QWidget *parent) :

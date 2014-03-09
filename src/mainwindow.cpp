@@ -2,8 +2,10 @@
 #include "ui_mainwindow.h"
 #include "resultswidget.h"
 
-#include "../include/keyrunnerplugininterface.h"
+#include <keyrunnerplugininterface.h>
 #include <searchresultinterface.h>
+
+#include <UGlobalHotkey/uglobalhotkeys.h>
 
 #include <QDir>
 #include <QPainter>
@@ -13,8 +15,6 @@
 #include <QKeyEvent>
 #include <QPluginLoader>
 #include <QDebug>
-
-#include <UGlobalHotkey/uglobalhotkeys.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,7 +52,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
-//    this->setWindowOpacity(0.8);
 
     // center
     this->move(QApplication::desktop()->screen()->rect().center() - this->rect().center());
@@ -164,11 +163,14 @@ void MainWindow::executeResult()
     SearchResultInterface* result = this->resultsWidget->getCurrentResult();
     if (result)
     {
-        result->execute();
+        bool hideWindow = result->execute();
 
         QLineEdit* lineSearch = this->centralWidget()->findChild<QLineEdit*>("lineSearch");
         if (lineSearch)
             lineSearch->setText("");
+
+        if (hideWindow)
+            this->hide();
     }
 }
 

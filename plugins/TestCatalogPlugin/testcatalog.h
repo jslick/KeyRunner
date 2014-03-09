@@ -11,7 +11,7 @@ class TestCatalog : public CatalogInterface
 public:
     TestCatalog(UiInterface& ui);
 
-    virtual void search(const QString& searchTerm, ResultCallback callback, SearchFinishCallback finishCallback);
+    void search(const QString& searchTerm, ResultCallback callback, SearchFinishCallback finishCallback);
 
 private:
     UiInterface& ui;

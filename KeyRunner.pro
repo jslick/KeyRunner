@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 SUBDIRS = \
     src \
-    plugins/TestCatalogPlugin
+    plugins/TestCatalogPlugin \
+    plugins/FilePlugin

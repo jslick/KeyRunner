@@ -10,6 +10,8 @@ class TestCatalogSearchResult : public SearchResultInterface
 public:
     TestCatalogSearchResult(const QString& id, const QString& display);
 
+    virtual bool isDynamicallyAllocated() const;
+
     virtual const QString& getId() const;
 
     virtual const QString& getDisplay() const;
@@ -18,7 +20,7 @@ public:
 
     void setSearchTerm(const QString& searchTerm);
 
-    virtual void execute();
+    virtual bool execute();
 
     void setCallback(std::function<void(TestCatalogSearchResult&)> callback);
 

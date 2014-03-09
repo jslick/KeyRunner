@@ -1,10 +1,15 @@
 #include "testcatalogsearchresult.h"
 
-#include <QDebug>   // TODO:  REMOVE
+#include <QDebug>
 
 TestCatalogSearchResult::TestCatalogSearchResult(const QString& id, const QString& display)
     : id(id), display(display)
 {
+}
+
+bool TestCatalogSearchResult::isDynamicallyAllocated() const
+{
+    return false;
 }
 
 const QString& TestCatalogSearchResult::getId() const
@@ -27,12 +32,14 @@ void TestCatalogSearchResult::setSearchTerm(const QString& searchTerm)
     this->searchTerm = searchTerm;
 }
 
-void TestCatalogSearchResult::execute()
+bool TestCatalogSearchResult::execute()
 {
     qDebug() << "Execute" << this->getDisplay();
 
     if (this->callback)
         this->callback(*this);
+
+    return true;
 }
 
 void TestCatalogSearchResult::setCallback(std::function<void(TestCatalogSearchResult&)> callback)
