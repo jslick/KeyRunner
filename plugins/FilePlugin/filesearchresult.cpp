@@ -8,22 +8,26 @@
 #include <QProcess>
 #include <QDebug>
 
+#ifdef Q_OS_WIN
+#  include <windows.h>
+#endif
+
 enum De
 {
-    Kde,
+    DeKde,
 
-    Unknown
+    DeUnknown
 };
 
 static De getDe()
 {
 #ifdef Q_OS_UNIX
     if (qgetenv("KDE_FULL_SESSION").length())
-        return Kde;
+        return DeKde;
     else
-        return Unknown;
+        return DeUnknown;
 #else
-    return Unknown;
+    return DeUnknown;
 #endif
 }
 
@@ -95,12 +99,23 @@ void FileSearchResult::setSearchTerm(const QString& searchTerm)
 
 bool FileSearchResult::execute()
 {
+#ifdef Q_OS_WIN
+
+    ::ShellExecuteW(
+                0,
+                L"open", this->filename.toStdWString().c_str(), 0,
+                QDir::homePath().toStdWString().c_str(),
+                SW_SHOW
+                );
+
+#else
+
     if (this->filename.endsWith(".desktop"))
     {
         QString execname = getXdgExec(this->filename);
         if (execname.length())
         {
-            if (getDe() == Kde)
+            if (getDe() == DeKde)
                 execname = "kstart --activate " + execname;
 
             qDebug() << "Executing: " << execname;
@@ -128,6 +143,8 @@ bool FileSearchResult::execute()
                               );
         return false;
     }
+
+#endif
 
     return true;
 }
