@@ -186,6 +186,9 @@ void MainWindow::loadPlugins()
 
     for (QString fileName : pluginsDir.entryList(QDir::Files))
     {
+        if (QLibrary::isLibrary(fileName) == false)
+            continue;
+
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         QObject* plugin = loader.instance();
         if (plugin)
