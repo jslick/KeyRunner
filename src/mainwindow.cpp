@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QPainter>
 #include <QMenu>
+#include <QTimer>
 #include <QSystemTrayIcon>
 #include <QDesktopWidget>
 #include <QKeyEvent>
@@ -25,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/app/icon.png"));
+
+    this->centralWidget()->layout()->setAlignment(Qt::AlignTop);
 
     QMenu* trayMenu = new QMenu(this);
     trayMenu->addAction(tr("Exit"), this, SLOT(close()));
@@ -55,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // center
     this->move(QApplication::desktop()->screen()->rect().center() - this->rect().center());
-    this->move(x(), y() - 160 / 2); // TODO:  extract height
+    this->move(x(), y() - height() / 2);
 
     QLineEdit* lineSearch = this->centralWidget()->findChild<QLineEdit*>("lineSearch");
     if (lineSearch)
@@ -71,8 +74,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&this->index, SIGNAL(resultsFound(QString, QList<SearchResultInterface*>)),
             SLOT(updateResults(QString, QList<SearchResultInterface*>))
             );
-
-    this->resultsWidget->setFixedHeight(160);
 
     this->loadPlugins();
 }
@@ -130,6 +131,7 @@ void MainWindow::fetchResults(QString searchTerm)
     {
         this->resultsWidget->hide();
         this->centralWidget()->layout()->removeWidget(this->resultsWidget);
+        QTimer::singleShot(0, this, SLOT(shrink()));
         return;
     }
 
@@ -172,6 +174,17 @@ void MainWindow::executeResult()
         if (hideWindow)
             this->hide();
     }
+}
+
+void MainWindow::shrink()
+{
+    this->resize(width(), 0);
+    QTimer::singleShot(0, this, SLOT(shrinkAgain()));
+}
+
+void MainWindow::shrinkAgain()
+{
+    this->resize(width(), 0);
 }
 
 void MainWindow::loadPlugins()

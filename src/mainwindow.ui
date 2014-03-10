@@ -7,19 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>62</height>
+    <height>69</height>
    </rect>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>400</width>
-    <height>62</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>Key Runner</string>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Minimum"/>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
      <number>24</number>
@@ -29,6 +26,16 @@
     </property>
     <item>
      <widget class="QLabel" name="lblSpace">
+      <property name="minimumSize">
+       <size>
+        <height>12</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <height>12</height>
+       </size>
+      </property>
       <property name="text">
        <string/>
       </property>

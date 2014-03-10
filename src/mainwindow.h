@@ -35,6 +35,9 @@ private slots:
     void updateResults(QString searchTerm, QList<SearchResultInterface*> results);
     void executeResult();
 
+    void shrink();
+    void shrinkAgain();
+
 private:
     void loadPlugins();
 
