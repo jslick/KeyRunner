@@ -14,10 +14,13 @@ TEMPLATE = app
 
 DESTDIR = ../
 
-INCLUDEPATH += $$PWD/../contrib/include/
+INCLUDEPATH += $$PWD/../contrib/
 unix {
-    LIBS += $$PWD/../contrib/lib/libUGlobalHotkey.a
+    LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/ -lUGlobalHotkey
     LIBS += -lxcb -lxcb-keysyms
+}
+win32 {
+    LIBS += $$OUT_PWD/../UGlobalHotkey.dll
 }
 
 INCLUDEPATH += $$PWD/../include/

@@ -1,0 +1,6 @@
+This is https://github.com/falceeffect/UGlobalHotkey.git with a modified .pro
+file.
+
+Revision:  71a4bdc0a0450971674767797db1e612f4149ce0
+
+License:  Public Domain
