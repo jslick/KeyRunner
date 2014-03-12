@@ -1,19 +1,26 @@
 #include "filecatalogdb.h"
 
+#include <QStringList>
+#include <QRegularExpression>
+
 FileCatalogDb::FileCatalogDb()
 {
 }
 
 void FileCatalogDb::add(const QString& searchTerm, const QString& display, const QString& filename)
 {
-    QHash<QChar,HashValue>* current = &this->index;
-    for (int i = 0; i < searchTerm.length(); i++)
+    QStringList words = searchTerm.split(QRegularExpression("\\s+"));
+    for (const QString& word : words)
     {
-        Q_ASSERT(current);
+        QHash<QChar,HashValue>* current = &this->index;
+        for (int i = 0; i < word.length(); i++)
+        {
+            Q_ASSERT(current);
 
-        HashValue& value = (*current)[searchTerm.at(i).toLower()];
-        value.files.push_back({ display, filename });
-        current = &value.subindex;
+            HashValue& value = (*current)[word.at(i).toLower()];
+            value.files.push_back({ display, filename });
+            current = &value.subindex;
+        }
     }
 }
 
