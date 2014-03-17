@@ -18,7 +18,8 @@ public:
 signals:
 
 public slots:
-
+    void selectDown();
+    void selectUp();
 };
 
 #endif // RESULTSWIDGET_H

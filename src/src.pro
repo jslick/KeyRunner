@@ -29,6 +29,7 @@ SOURCES += \
     main.cpp \
     index.cpp \
     mainwindow.cpp \
+    searchlineedit.cpp \
     resultswidget.cpp \
     keyrunnerui.cpp
 
@@ -39,6 +40,7 @@ HEADERS  += \
     ../include/keyrunnerplugininterface.h \
     index.h \
     mainwindow.h \
+    searchlineedit.h \
     resultswidget.h \
     keyrunnerui.h
 

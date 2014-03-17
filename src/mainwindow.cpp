@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "searchlineedit.h"
 #include "resultswidget.h"
 
 #include <keyrunnerplugininterface.h>
@@ -21,6 +22,7 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    searchLineEdit(new SearchLineEdit),
     resultsWidget(new ResultsWidget),
     trayIcon(new QSystemTrayIcon(this)),
     pluginUi(this)
@@ -34,29 +36,43 @@ MainWindow::MainWindow(QWidget* parent) :
 
     this->centralWidget()->layout()->setAlignment(Qt::AlignTop);
 
-    QMenu* trayMenu = new QMenu(this);
-    trayMenu->addAction(tr("Exit"), this, SLOT(close()));
-    this->trayIcon->setContextMenu(trayMenu);
-    this->trayIcon->setIcon(this->windowIcon());
-    this->trayIcon->show();
+    {
+        QLineEdit* lineSearch = this->centralWidget()->findChild<QLineEdit*>("lineSearch");
+        delete lineSearch;
 
-    UGlobalHotkeys* hotkeyManager = new UGlobalHotkeys();   // TODO:  cleanup
-    try
-    {
-        hotkeyManager->registerHotkey("Ctrl+Alt+Space");
-    }
-    catch (UException& e)
-    {
-        qDebug() << "Unable to register hotkey:  " << e.what();
+        this->searchLineEdit->setPlaceholderText(tr("Type to search..."));
+        lineSearch = this->searchLineEdit;
+        this->searchLineEdit->setObjectName("lineSearch");
+        this->centralWidget()->layout()->addWidget(this->searchLineEdit);
     }
 
-    connect(hotkeyManager, &UGlobalHotkeys::activated, [this](size_t id)
     {
-        if (this->isVisible())
-            this->hide();
-        else
-            this->bringToFront();
-    });
+        QMenu* trayMenu = new QMenu(this);
+        trayMenu->addAction(tr("Exit"), this, SLOT(close()));
+        this->trayIcon->setContextMenu(trayMenu);
+        this->trayIcon->setIcon(this->windowIcon());
+        this->trayIcon->show();
+    }
+
+    {
+        UGlobalHotkeys* hotkeyManager = new UGlobalHotkeys();   // TODO:  cleanup
+        try
+        {
+            hotkeyManager->registerHotkey("Ctrl+Alt+Space");
+        }
+        catch (UException& e)
+        {
+            qDebug() << "Unable to register hotkey:  " << e.what();
+        }
+
+        connect(hotkeyManager, &UGlobalHotkeys::activated, [this](size_t id)
+        {
+            if (this->isVisible())
+                this->hide();
+            else
+                this->bringToFront();
+        });
+    }
 
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -65,16 +81,18 @@ MainWindow::MainWindow(QWidget* parent) :
     this->move(QApplication::desktop()->screen()->rect().center() - this->rect().center());
     this->move(x(), y() - height() / 2);
 
-    QLineEdit* lineSearch = this->centralWidget()->findChild<QLineEdit*>("lineSearch");
-    if (lineSearch)
-    {
-        connect(lineSearch, SIGNAL(textChanged(QString)),
-                SLOT(fetchResults(QString))
-                );
-        connect(lineSearch, SIGNAL(returnPressed()),
-                SLOT(executeResult())
-                );
-    }
+    connect(this->searchLineEdit, SIGNAL(textChanged(QString)),
+            SLOT(fetchResults(QString))
+            );
+    connect(this->searchLineEdit, SIGNAL(returnPressed()),
+            SLOT(executeResult())
+            );
+    connect(this->searchLineEdit, SIGNAL(keyDown()),
+            this->resultsWidget, SLOT(selectDown())
+            );
+    connect(this->searchLineEdit, SIGNAL(keyUp()),
+            this->resultsWidget, SLOT(selectUp())
+            );
 
     connect(&this->index, SIGNAL(resultsFound(QString, QList<SearchResultInterface*>)),
             SLOT(updateResults(QString, QList<SearchResultInterface*>))

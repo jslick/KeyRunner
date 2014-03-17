@@ -58,3 +58,17 @@ SearchResultInterface* ResultsWidget::getCurrentResult()
     auto item = dynamic_cast<ResultsListItem*>(this->currentItem());
     return item ? item->result : 0;
 }
+
+void ResultsWidget::selectDown()
+{
+    if (this->currentRow() < this->count() - 1)
+        this->setCurrentRow(this->currentRow() + 1);
+}
+
+void ResultsWidget::selectUp()
+{
+    if (this->currentRow() < 0)
+        this->setCurrentRow(this->count() - 1);
+    else if (this->currentRow() > 0)
+        this->setCurrentRow(this->currentRow() - 1);
+}

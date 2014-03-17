@@ -8,6 +8,7 @@
 #include <QList>
 
 class QSystemTrayIcon;
+class SearchLineEdit;
 class ResultsWidget;
 
 namespace Ui {
@@ -50,6 +51,7 @@ private:
             );
 
     Ui::MainWindow*     ui;
+    SearchLineEdit*     searchLineEdit;
     ResultsWidget*      resultsWidget;
     QSystemTrayIcon*    trayIcon;
 
