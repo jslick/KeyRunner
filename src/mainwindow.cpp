@@ -8,6 +8,7 @@
 #include <UGlobalHotkey/uglobalhotkeys.h>
 
 #include <QDir>
+#include <QPalette>
 #include <QPainter>
 #include <QMenu>
 #include <QTimer>
@@ -17,7 +18,7 @@
 #include <QPluginLoader>
 #include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     resultsWidget(new ResultsWidget),
@@ -26,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/app/icon.png"));
+
+    QPalette pal = this->palette();
+    pal.setColor(this->backgroundRole(), Qt::black);
+    this->setPalette(pal);
 
     this->centralWidget()->layout()->setAlignment(Qt::AlignTop);
 
