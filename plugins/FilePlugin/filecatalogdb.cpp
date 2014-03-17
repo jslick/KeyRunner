@@ -26,25 +26,39 @@ void FileCatalogDb::add(const QString& searchTerm, const QString& display, const
 
 void FileCatalogDb::find(const QString& searchTerm, std::function<void(const QString& display,const QString& filename)> matchCallback)
 {
-    QHash<QChar,HashValue>* current = &this->index;
-    HashValue* currentValue = 0;
-    for (QChar ch : searchTerm.toLower())
+    QStringList words = searchTerm.toLower().split(QRegularExpression("\\s+"));
+    const HashValue* matchValue = 0;
+    for (const QString& word : words)
+    {
+        const HashValue* wordMatchValue = this->matchWord(word);
+        if (matchValue == 0)
+            matchValue = wordMatchValue;
+    }
+
+    if (matchValue && matchCallback)
+    {
+        for (const Match& file: matchValue->files)
+        {
+            matchCallback(file.display, file.filename);
+        }
+    }
+}
+
+const FileCatalogDb::HashValue* FileCatalogDb::matchWord(const QString& word) const
+{
+    const QHash<QChar,HashValue>* current = &this->index;
+    const HashValue* currentValue = 0;
+    for (QChar ch : word.toLower())
     {
         Q_ASSERT(current);
 
         auto iter = current->find(ch);
         if (iter == current->end())
-            return;
+            return 0;
 
         currentValue = &iter.value();
         current = &iter.value().subindex;
     }
 
-    if (currentValue && matchCallback)
-    {
-        for (const Match& file: currentValue->files)
-        {
-            matchCallback(file.display, file.filename);
-        }
-    }
+    return currentValue;
 }

@@ -28,6 +28,8 @@ private:
         QHash<QChar,HashValue> subindex;
     };
 
+    const HashValue* matchWord(const QString& word) const;
+
     QHash<QChar,HashValue> index;
 };
 

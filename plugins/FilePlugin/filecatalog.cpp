@@ -1,7 +1,6 @@
 #include "filecatalog.h"
 #include "filesearchresult.h"
 
-#include <QRegularExpression>
 //#include <QDir>
 
 FileCatalog::FileCatalog()
@@ -30,24 +29,20 @@ FileCatalog::FileCatalog()
 
 void FileCatalog::search(const QString& searchTerm, ResultCallback callback, SearchFinishCallback finishCallback)
 {
-    QStringList words = searchTerm.toLower().split(QRegularExpression("\\s+"));
-    for (const QString& word : words)
+    if (this->dbThread.isRunning())
+        this->dbLock.lockForRead();
+
+    // Captures are by reference - this is currently synchronous.
+    // Capture by value if this becomes async.
+    this->db.find(searchTerm, [this,&searchTerm,&callback](const QString& display,const QString& filename)
     {
-        if (this->dbThread.isRunning())
-            this->dbLock.lockForRead();
+        QList<SearchResultInterface*> results;
+        results.push_back(makeResult(display, filename));
+        callback(searchTerm, results);
+    });
 
-        // Captures are by reference - this is currently synchronous.
-        // Capture by value if this becomes async.
-        this->db.find(word, [this,&searchTerm,&callback](const QString& display,const QString& filename)
-        {
-            QList<SearchResultInterface*> results;
-            results.push_back(makeResult(display, filename));
-            callback(searchTerm, results);
-        });
-
-        if (this->dbThread.isRunning())
-            this->dbLock.unlock();
-    }
+    if (this->dbThread.isRunning())
+        this->dbLock.unlock();
 
     if (finishCallback)
         finishCallback(searchTerm);

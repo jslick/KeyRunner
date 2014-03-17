@@ -3,11 +3,8 @@
 
 #include <uiinterface.h>
 
-#include <QStringList>
-#include <QRegularExpression>
-#include <QMainWindow>
-
 #include <functional>
+#include <QMainWindow>
 
 TestCatalog::TestCatalog(UiInterface& ui)
     : ui(ui),
@@ -24,28 +21,25 @@ TestCatalog::TestCatalog(UiInterface& ui)
 
 void TestCatalog::search(const QString& searchTerm, ResultCallback callback, SearchFinishCallback finishCallback)
 {
-    QStringList words = searchTerm.toLower().split(QRegularExpression("\\s+"));
-    for (QString word : words)
+    const QString mySearchTerm = searchTerm.toLower().trimmed();
+    if (QString(QObject::tr("exit")).contains(mySearchTerm))
     {
-        if (QString(QObject::tr("exit")).contains(word))
+        this->exitSearchResult.setSearchTerm(searchTerm);
+        if (callback)
         {
-            this->exitSearchResult.setSearchTerm(searchTerm);
-            if (callback)
-            {
-                QList<SearchResultInterface*> results;
-                results.push_back(&this->exitSearchResult);
-                callback(searchTerm, results);
-            }
+            QList<SearchResultInterface*> results;
+            results.push_back(&this->exitSearchResult);
+            callback(searchTerm, results);
         }
-        if (QString(QObject::tr("exercise")).contains(word))
+    }
+    if (QString(QObject::tr("exercise")).contains(mySearchTerm))
+    {
+        this->exerciseSearchResult.setSearchTerm(searchTerm);
+        if (callback)
         {
-            this->exerciseSearchResult.setSearchTerm(searchTerm);
-            if (callback)
-            {
-                QList<SearchResultInterface*> results;
-                results.push_back(&this->exerciseSearchResult);
-                callback(searchTerm, results);
-            }
+            QList<SearchResultInterface*> results;
+            results.push_back(&this->exerciseSearchResult);
+            callback(searchTerm, results);
         }
     }
 
