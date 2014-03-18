@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2014 KeyRunner developers
+ *
+ * See the file license.txt for copying permission.
+ */
+
 #include "filesearchresult.h"
 
 #include <QFile>

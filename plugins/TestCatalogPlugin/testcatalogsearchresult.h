@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) 2014 KeyRunner developers
+ *
+ * See the file license.txt for copying permission.
+ */
+
 #ifndef TESTCATALOGSEARCHRESULT_H
 #define TESTCATALOGSEARCHRESULT_H
 
 #include <searchresultinterface.h>
-
 #include <functional>
 
 class TestCatalogSearchResult : public SearchResultInterface

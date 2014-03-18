@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2014 KeyRunner developers
+ *
+ * See the file license.txt for copying permission.
+ */
+
 #ifndef RESULTSWIDGET_H
 #define RESULTSWIDGET_H
 

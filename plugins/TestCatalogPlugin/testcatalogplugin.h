@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2014 KeyRunner developers
+ *
+ * See the file license.txt for copying permission.
+ */
+
 #pragma once
 
 #include <keyrunnerplugininterface.h>
-
 #include <QGenericPlugin>
 
 class TestCatalogPlugin : public QGenericPlugin, public KeyRunnerPluginInterface
