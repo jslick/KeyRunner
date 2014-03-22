@@ -40,10 +40,10 @@ void FileCatalog::search(const QString& searchTerm, ResultCallback callback, Sea
 
     // Captures are by reference - this is currently synchronous.
     // Capture by value if this becomes async.
-    this->db.find(searchTerm, [this,&searchTerm,&callback](const QString& display,const QString& filename)
+    this->db.find(searchTerm, [this,&searchTerm,&callback](const QString& display,const QString& filename,const QStringList& args)
     {
         QList<SearchResultInterface*> results;
-        results.push_back(makeResult(display, filename));
+        results.push_back(makeResult(display, filename, args));
         callback(searchTerm, results);
     });
 
@@ -59,8 +59,8 @@ void FileCatalog::startIndex()
     this->dbThread.start();
 }
 
-FileSearchResult* FileCatalog::makeResult(const QString& display, const QString& filename)
+FileSearchResult* FileCatalog::makeResult(const QString& display, const QString& filename, const QStringList& params)
 {
-    FileSearchResult* result = new FileSearchResult(filename, display, filename);
+    FileSearchResult* result = new FileSearchResult(filename, display, filename, params);
     return result;
 }

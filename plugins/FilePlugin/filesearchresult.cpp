@@ -73,8 +73,8 @@ static QString getXdgExec(const QString& filename)
         return "";
 }
 
-FileSearchResult::FileSearchResult(const QString& id, const QString& display, const QString& filename)
-    : id(id), display(display), filename(filename)
+FileSearchResult::FileSearchResult(const QString& id, const QString& display, const QString& filename, const QStringList& args)
+    : id(id), display(display), filename(filename), args(args)
 {
 }
 
@@ -107,12 +107,17 @@ bool FileSearchResult::execute()
 {
 #ifdef Q_OS_WIN
 
-    ::ShellExecuteW(
+    const QString exe = this->filename;
+    const QString params = this->args.join(' ');
+    qDebug() << "Executing" << (exe + params);
+    int rv = (int) ::ShellExecuteW(
                 0,
-                L"open", this->filename.toStdWString().c_str(), 0,
+                L"open", exe.toStdWString().c_str(), params.toStdWString().c_str(),
                 QDir::homePath().toStdWString().c_str(),
                 SW_SHOW
                 );
+    if (rv <= 32)
+        qDebug() << "Unable to execute; rv is" << rv;
 
 #else
 

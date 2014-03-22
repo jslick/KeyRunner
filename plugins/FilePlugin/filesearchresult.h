@@ -9,10 +9,12 @@
 
 #include <searchresultinterface.h>
 
+#include <QStringList>
+
 class FileSearchResult : public SearchResultInterface
 {
 public:
-    FileSearchResult(const QString& id, const QString& display, const QString& filename = "");
+    FileSearchResult(const QString& id, const QString& display, const QString& filename, const QStringList& args);
 
     virtual bool isDynamicallyAllocated() const;
 
@@ -32,6 +34,7 @@ private:
     QString searchTerm;
 
     QString filename;
+    QStringList args;
 };
 
 #endif // FILESEARCHRESULT_H

@@ -25,7 +25,7 @@ public:
 private:
     void startIndex();
 
-    FileSearchResult* makeResult(const QString& display, const QString& filename);
+    FileSearchResult* makeResult(const QString& display, const QString& filename, const QStringList& params);
 
     FileCatalogDb   db;
     QReadWriteLock  dbLock;

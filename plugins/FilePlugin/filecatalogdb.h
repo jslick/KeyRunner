@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <QString>
+#include <QStringList>
 #include <QList>
 #include <QHash>
 
@@ -17,15 +18,16 @@ class FileCatalogDb
 public:
     FileCatalogDb();
 
-    void add(const QString& searchTerm, const QString& display, const QString& filename);
+    void add(const QString& searchTerm, const QString& display, const QString& filename, const QStringList& args);
 
-    void find(const QString& searchTerm, std::function<void(const QString& display,const QString& filename)> matchCallback);
+    void find(const QString& searchTerm, std::function<void(const QString& display,const QString& filename,const QStringList& args)> matchCallback);
 
 private:
     struct Match
     {
         QString display;
         QString filename;
+        QStringList args;
     };
 
     struct HashValue

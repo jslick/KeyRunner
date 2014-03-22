@@ -13,7 +13,7 @@ FileCatalogDb::FileCatalogDb()
 {
 }
 
-void FileCatalogDb::add(const QString& searchTerm, const QString& display, const QString& filename)
+void FileCatalogDb::add(const QString& searchTerm, const QString& display, const QString& filename, const QStringList& args)
 {
     QStringList words = searchTerm.split(QRegularExpression("\\s+"));
     for (const QString& word : words)
@@ -24,13 +24,13 @@ void FileCatalogDb::add(const QString& searchTerm, const QString& display, const
             Q_ASSERT(current);
 
             HashValue& value = (*current)[word.at(i).toLower()];
-            value.files.push_back({ display, filename });
+            value.files.push_back({ display, filename, args });
             current = &value.subindex;
         }
     }
 }
 
-void FileCatalogDb::find(const QString& searchTerm, std::function<void(const QString& display,const QString& filename)> matchCallback)
+void FileCatalogDb::find(const QString& searchTerm, std::function<void(const QString& display,const QString& filename,const QStringList& args)> matchCallback)
 {
     QStringList words = searchTerm.toLower().split(QRegularExpression("\\s+"));
     const HashValue* matchValue = 0;
@@ -45,7 +45,7 @@ void FileCatalogDb::find(const QString& searchTerm, std::function<void(const QSt
     {
         for (const Match& file: matchValue->files)
         {
-            matchCallback(file.display, file.filename);
+            matchCallback(file.display, file.filename, file.args);
         }
     }
 }

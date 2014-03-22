@@ -7,6 +7,7 @@
 #include "fileindexthread.h"
 #include "filecatalogdb.h"
 
+#include <finalizer.h>
 #include <QStringList>
 #include <QStack>
 #include <QDir>
@@ -14,14 +15,17 @@
 #  include <QSettings>
 #  include <userenv.h>
 #  include <Shlobj.h>
+#  include <cpl.h>
 #endif
 #include <QReadWriteLock>
+#include <QLibrary>
+#include <QDebug>
 
 static QString expandEnvironmentPath(const QString& path)
 {
 #ifdef Q_OS_WIN
-    WCHAR dst[512];
-    DWORD nCopied = ExpandEnvironmentStringsW(path.toStdWString().c_str(), dst, sizeof(dst));
+    WCHAR dst[MAX_PATH];
+    DWORD nCopied = ExpandEnvironmentStringsW(path.toStdWString().c_str(), dst, sizeof(dst) / sizeof(WCHAR));
     if (nCopied == 0)   // failure
         return path;
     const QString expanded = QString::fromWCharArray(dst);
@@ -31,6 +35,85 @@ static QString expandEnvironmentPath(const QString& path)
     return path;
 #endif
 }
+
+#ifdef Q_OS_WIN
+static QString getWindowsSystemPath()
+{
+    WCHAR pSystemPath[MAX_PATH];
+    UINT nCopied = GetSystemDirectoryW(pSystemPath, sizeof(pSystemPath) / sizeof(WCHAR));
+    if (nCopied)
+        return QString::fromWCharArray(pSystemPath, nCopied);
+    else
+        return "";
+}
+#endif
+
+#ifdef Q_OS_WIN
+static bool readCpl(const QString& cplFilename, FileCatalogDb& db, QReadWriteLock& dbLock)
+{
+    QLibrary libCpl(cplFilename);
+    bool success = libCpl.load();
+    if (!success)
+    {
+        qDebug() << "Unable to load cpl" << cplFilename;
+        return false;
+    }
+    Finalizer unloadLib([&libCpl]() { libCpl.unload(); });
+    Q_UNUSED(unloadLib);
+
+    APPLET_PROC proc = (APPLET_PROC) libCpl.resolve("CPlApplet");
+    if (!proc)
+    {
+        qDebug() << "Cannot resolve symbol from" << cplFilename << ": " << libCpl.errorString();
+        return false;
+    }
+
+    LONG rv = proc(0, CPL_INIT, 0, 0);
+    if (rv == 0)
+        return false;
+
+    Finalizer callCplExit([&proc] { if (proc) proc(0, CPL_EXIT, 0, 0); });
+    Q_UNUSED(callCplExit);
+
+    HMODULE hLibInst = GetModuleHandle(libCpl.fileName().toStdWString().c_str());
+
+    const QString systemPath = getWindowsSystemPath();
+    const QDir systemDir(systemPath);
+    const QString controlExePath = systemDir.absoluteFilePath("control.exe");
+
+    LONG nDialogs = proc(0, CPL_GETCOUNT, 0, 0);
+    if (nDialogs)
+        dbLock.lockForWrite();
+    for (LONG i = 0; i < nDialogs; i++)
+    {
+        CPLINFO cplInfo;
+        memset(&cplInfo, 0, sizeof(cplInfo));
+        proc(0, CPL_INQUIRE, i, reinterpret_cast<LPARAM>(&cplInfo));
+        // MSDN documentation says CPL_INQUIRE returns zero upon success.  But, for some reason,
+        // it returns non-zero for some cpl (e.g. main.cpl).  We will ignore the return value.
+
+        WCHAR cplNameBuffer[256];
+        const int nCopied = LoadStringW(hLibInst, cplInfo.idName, cplNameBuffer, sizeof(cplNameBuffer) / sizeof(WCHAR));
+        if (nCopied == 0)
+        {
+            qDebug() << "Unable to load string for" << libCpl.fileName() << i;
+            continue;
+        }
+
+        const QString cplName = QString::fromWCharArray(cplNameBuffer, nCopied);
+        db.add(cplName, cplName,
+               controlExePath,
+                { libCpl.fileName() + ",@" + QString::number(i) }
+               );
+    }
+    if (nDialogs)
+        dbLock.unlock();
+
+    callCplExit.doNow();
+
+    return true;
+}
+#endif
 
 FileIndexThread::FileIndexThread(FileCatalogDb& db, QReadWriteLock& dbLock, QObject* parent) :
     QThread(parent),
@@ -91,7 +174,7 @@ void FileIndexThread::run()
                 const QString basename = dot > 0 ? filename.left(dot) : filename;
 
                 dbLock.lockForWrite();
-                this->db.add(basename, basename, path.absoluteFilePath(filename));
+                this->db.add(basename, basename, path.absoluteFilePath(filename), QStringList());
                 dbLock.unlock();
             }
 
@@ -102,6 +185,15 @@ void FileIndexThread::run()
             }
         }
     }
+
+#ifdef Q_OS_WIN
+    const QString systemPath = getWindowsSystemPath();
+
+    for (const QString& filename : QDir(systemPath).entryList({ "*.cpl" }))
+    {
+        readCpl(filename, this->db, this->dbLock);
+    }
+#endif
 
     emit indexDone();
 }

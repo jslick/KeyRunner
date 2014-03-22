@@ -34,6 +34,7 @@ SOURCES += \
     keyrunnerui.cpp
 
 HEADERS  += \
+    ../include/finalizer.h \
     ../include/uiinterface.h \
     ../include/cataloginterface.h \
     ../include/searchresultinterface.h \
